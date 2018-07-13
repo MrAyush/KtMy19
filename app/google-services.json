@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "2531129548",
+    "firebase_url": "https://prefab-conquest-207611.firebaseio.com",
+    "project_id": "prefab-conquest-207611",
+    "storage_bucket": "prefab-conquest-207611.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:2531129548:android:8d9f3f07872397a8",
+        "android_client_info": {
+          "package_name": "com.example.ayushgupta.ktmy19"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "2531129548-3oqajlvgmb6ovb2lhdbdm61ovct8tmkr.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.ayushgupta.ktmy19",
+            "certificate_hash": "eecb3c1cf1a2e870ef8cd985ec92f975168f68ba"
+          }
+        },
+        {
+          "client_id": "2531129548-r83tuqkm4q2nga0fafk9apeqrkq7gn81.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCo8W03tQDOOe9Gh1wcf-EF3lmItJd6ljk"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "2531129548-r83tuqkm4q2nga0fafk9apeqrkq7gn81.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
