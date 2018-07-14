@@ -48,4 +48,11 @@
         android:text="Login"
         android:textColor="#000000" />
 
+    <ProgressBar
+        android:visibility="gone"
+        android:id="@+id/pb1"
+        android:padding="10dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
 </LinearLayout>
