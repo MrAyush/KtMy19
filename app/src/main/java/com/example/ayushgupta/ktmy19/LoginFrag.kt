@@ -35,9 +35,13 @@ class LoginFrag : Fragment(), UserPassView {
             val nInfo = cManager.activeNetworkInfo
             val isConnected = nInfo?.isConnected == true
             if (isConnected) {
-                userPassBeans = UserPassBeans(let1.text.toString(), let2.text.toString())
-                val loginEvent = LoginEvent(this)
-                loginEvent.loginWithEmail(userPassBeans, view)
+                if (let1.text.toString() == "" || let2.text.toString() == "") {
+                    Toast.makeText(activity, "Email/Password field is empty", Toast.LENGTH_SHORT).show()
+                } else {
+                    userPassBeans = UserPassBeans(let1.text.toString(), let2.text.toString())
+                    val loginEvent = LoginEvent(this)
+                    loginEvent.loginWithEmail(userPassBeans, view)
+                }
             } else {
                 Toast.makeText(activity, "No Internet Connection", Toast.LENGTH_SHORT).show()
             }

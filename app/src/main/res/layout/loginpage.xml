@@ -14,39 +14,93 @@
         android:paddingBottom="30dp"
         android:textColor="#FFFFFF"
         android:textSize="30sp" />
-
-    <EditText
-        android:id="@+id/let1"
-        android:layout_width="300dp"
-        android:layout_height="40dp"
-        android:layout_margin="10dp"
-        android:background="@drawable/rounded_edit_text"
+    <RadioGroup
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:gravity="center"
-        android:hint="Email"
-        android:inputType="textEmailAddress"
-        android:textColor="#FFFFFF"
-        android:textColorHint="#000000" />
+        android:orientation="horizontal">
+        <RadioButton
+            android:id="@+id/student"
+            android:textColor="#FFF"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Student"/>
+        <RadioButton
+            android:id="@+id/Admin"
+            android:textColor="#FFF"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Admin"/>
+    </RadioGroup>
 
-    <EditText
-        android:id="@+id/let2"
-        android:layout_width="300dp"
-        android:layout_height="40dp"
-        android:layout_margin="10dp"
-        android:background="@drawable/rounded_edit_text"
-        android:gravity="center"
-        android:hint="Password"
-        android:inputType="textPassword"
-        android:textColor="#FFFFFF"
-        android:textColorHint="#000000" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingStart="25dp"
+        android:paddingEnd="25dp">
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:contentDescription="@string/app_name"
+            android:src="@drawable/ic_action_person" />
+
+        <EditText
+            android:id="@+id/let1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Email"
+            android:inputType="textEmailAddress"
+            android:paddingBottom="10dp"
+            android:paddingEnd="0dp"
+            android:paddingStart="5dp"
+            android:paddingTop="10dp"
+            android:textColor="#FFF"
+            android:textColorHint="#FFF"
+            android:textSize="25sp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingStart="25dp"
+        android:paddingEnd="25dp">
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:contentDescription="@string/app_name"
+            android:src="@drawable/ic_action_lock" />
+
+        <EditText
+            android:id="@+id/let2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Password"
+            android:inputType="textPassword"
+            android:paddingBottom="10dp"
+            android:paddingEnd="0dp"
+            android:paddingStart="5dp"
+            android:paddingTop="10dp"
+            android:textColor="#FFF"
+            android:textColorHint="#FFF"
+            android:textSize="25sp" />
+    </LinearLayout>
 
     <Button
         android:id="@+id/login"
-        android:layout_width="300dp"
-        android:layout_height="40dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:layout_marginTop="80dp"
+        android:layout_marginStart="25dp"
+        android:layout_marginEnd="25dp"
         android:background="@drawable/rounded_button"
         android:text="Login"
-        android:textColor="#000000" />
+        android:textColor="#FFF" />
 
     <ProgressBar
         android:visibility="gone"
