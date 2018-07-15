@@ -9,6 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
+import android.widget.RadioButton
 import android.widget.Toast
 import com.example.ayushgupta.ktmy19.beans.UserPassBeans
 import com.example.ayushgupta.ktmy19.model.LoginEvent
@@ -23,12 +24,14 @@ class LoginFrag : Fragment(), UserPassView {
     private lateinit var btn: Button
     private lateinit var let1: EditText
     private lateinit var let2: EditText
+    private lateinit var radioButton: RadioButton
 
     override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View {
         val view = inflater?.inflate(R.layout.loginpage, container, false)
         btn = view!!.findViewById(R.id.login)
         let1 = view.findViewById(R.id.let1)
         let2 = view.findViewById(R.id.let2)
+        radioButton = view.findViewById(R.id.admin)
 
         btn.setOnClickListener {
             val cManager = activity.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
@@ -40,7 +43,7 @@ class LoginFrag : Fragment(), UserPassView {
                 } else {
                     userPassBeans = UserPassBeans(let1.text.toString(), let2.text.toString())
                     val loginEvent = LoginEvent(this)
-                    loginEvent.loginWithEmail(userPassBeans, view)
+                    loginEvent.loginWithEmail(userPassBeans, view, radioButton.isChecked)
                 }
             } else {
                 Toast.makeText(activity, "No Internet Connection", Toast.LENGTH_SHORT).show()

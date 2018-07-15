@@ -10,35 +10,39 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:text="ITER"
         android:paddingBottom="30dp"
+        android:text="ITER"
         android:textColor="#FFFFFF"
         android:textSize="30sp" />
+
     <RadioGroup
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:checkedButton="@id/student"
         android:gravity="center"
         android:orientation="horizontal">
+
         <RadioButton
             android:id="@+id/student"
-            android:textColor="#FFF"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Student"/>
+            android:text="Student"
+            android:textColor="#FFF" />
+
         <RadioButton
-            android:id="@+id/Admin"
-            android:textColor="#FFF"
+            android:id="@+id/admin"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Admin"/>
+            android:text="Admin"
+            android:textColor="#FFF" />
     </RadioGroup>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:paddingStart="25dp"
-        android:paddingEnd="25dp">
+        android:paddingEnd="25dp"
+        android:paddingStart="25dp">
 
         <ImageView
             android:layout_width="wrap_content"
@@ -66,8 +70,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:paddingStart="25dp"
-        android:paddingEnd="25dp">
+        android:paddingEnd="25dp"
+        android:paddingStart="25dp">
 
         <ImageView
             android:layout_width="wrap_content"
@@ -95,18 +99,18 @@
         android:id="@+id/login"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="80dp"
-        android:layout_marginStart="25dp"
         android:layout_marginEnd="25dp"
+        android:layout_marginStart="25dp"
+        android:layout_marginTop="80dp"
         android:background="@drawable/rounded_button"
         android:text="Login"
         android:textColor="#FFF" />
 
     <ProgressBar
-        android:visibility="gone"
         android:id="@+id/pb1"
-        android:padding="10dp"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:padding="10dp"
+        android:visibility="gone" />
 
 </LinearLayout>
