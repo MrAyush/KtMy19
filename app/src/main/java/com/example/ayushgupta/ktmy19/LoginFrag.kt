@@ -2,6 +2,7 @@ package com.example.ayushgupta.ktmy19
 
 import android.app.Fragment
 import android.content.Context
+import android.content.Intent
 import android.net.ConnectivityManager
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -16,8 +17,14 @@ import com.example.ayushgupta.ktmy19.model.LoginEvent
 import com.example.ayushgupta.ktmy19.view.UserPassView
 
 class LoginFrag : Fragment(), UserPassView {
-    override fun onConnectionResults(msg: String) {
+    override fun onConnectionResults(msg: String, isSuccess: Boolean, isAdmin: Boolean) {
         Toast.makeText(activity, msg, Toast.LENGTH_SHORT).show()
+        val intent = if (isSuccess && !isAdmin) {
+            Intent(this.activity, UserActivity::class.java)
+        } else{
+            Intent(Intent.ACTION_CALL)
+        }
+        startActivity(intent)
     }
 
     private lateinit var userPassBeans: UserPassBeans
@@ -43,7 +50,10 @@ class LoginFrag : Fragment(), UserPassView {
                 } else {
                     userPassBeans = UserPassBeans(let1.text.toString(), let2.text.toString())
                     val loginEvent = LoginEvent(this)
-                    loginEvent.loginWithEmail(userPassBeans, view, radioButton.isChecked)
+                    loginEvent.loginWithEmail(userPassBeans, view)
+                    if (radioButton.isChecked) {
+                        loginEvent.checkAdmin()
+                    }
                 }
             } else {
                 Toast.makeText(activity, "No Internet Connection", Toast.LENGTH_SHORT).show()

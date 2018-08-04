@@ -5,9 +5,9 @@ import android.content.ContentValues.TAG
 import android.util.Log
 import android.view.View
 import android.widget.ProgressBar
-import android.widget.Toast
 import com.example.ayushgupta.ktmy19.LoginFrag
 import com.example.ayushgupta.ktmy19.R
+import com.example.ayushgupta.ktmy19.beans.UserInfoBeans
 import com.example.ayushgupta.ktmy19.beans.UserPassBeans
 import com.example.ayushgupta.ktmy19.presenter.UserPassPresenter
 import com.google.firebase.auth.FirebaseAuth
@@ -18,48 +18,64 @@ class LoginEvent(private val loginFrag: LoginFrag) : UserPassPresenter {
     private lateinit var mAuth: FirebaseAuth
     private lateinit var msg: String
     private lateinit var progressBar: ProgressBar
+    private lateinit var userInfoBeans: UserInfoBeans
 
-    override fun loginWithEmail(userPassBeans: UserPassBeans, view: View, isAdmin: Boolean) {
+    override fun loginWithEmail(userPassBeans: UserPassBeans, view: View) {
+        msg = ""
+        var isSuccess = false
         progressBar = view.findViewById(R.id.pb1)
         progressBar.visibility = View.VISIBLE
         mAuth = FirebaseAuth.getInstance()
         mAuth.signInWithEmailAndPassword(userPassBeans.username, userPassBeans.password).addOnCompleteListener {
             if (it.isSuccessful) {
                 msg = "Login Successful."
-                if (isAdmin) {
-                    checkAdmin(mAuth)
-                } else {
-                    //TODO Navigate to the user dashboard
-                }
+                isSuccess = true
+                mAuth = FirebaseAuth.getInstance()
+                display(mAuth)
             } else {
                 msg = "Login failed."
             }
+            loginFrag.onConnectionResults(msg, isSuccess, false)
             progressBar.visibility = View.GONE
-            loginFrag.onConnectionResults(msg)
+        }.addOnFailureListener {
+            it.printStackTrace()
         }
     }
 
-    private fun checkAdmin(mAuth: FirebaseAuth) {
+    private fun display(mAuth:  FirebaseAuth){
+        val user = mAuth.currentUser
+        if (user != null){
+            //Log.w("name:", user.displayName)
+            Log.w("email:", user.email)
+            Log.w("pic:", user.photoUrl.toString())
+        }
+    }
+
+    override fun checkAdmin() {
+        mAuth = FirebaseAuth.getInstance()
+        msg = ""
+        var checkAdmin = false
         val dbase = FirebaseFirestore.getInstance()
         dbase.collection("Admins").document("${mAuth.currentUser?.uid}")
                 .get().addOnCompleteListener {
                     if (it.isSuccessful) {
                         val doc = it.result
                         if (doc.exists()) {
-                            val isAdmin = doc.data?.getValue("isAdmin") as Boolean
-                            if (isAdmin) {
-                                Toast.makeText(loginFrag.activity, "user is admin", Toast.LENGTH_SHORT).show()
+                            checkAdmin = doc.data?.getValue("isAdmin") as Boolean
+                            msg += "Admin: $checkAdmin"
+                            if (checkAdmin) {
                                 //TODO Navigate to the admin activity
                             } else {
-                                Toast.makeText(loginFrag.activity, "user is not a admin", Toast.LENGTH_SHORT).show()
+
                             }
                             Log.w(TAG, "Value: " + doc.data.toString())
                         } else {
-                            msg += "Error while checking admin"
+                            msg = "Error while checking admin"
                         }
                     } else {
-                        msg += "doc doesn't exists"
+                        msg = "doc doesn't exists"
                     }
+                    loginFrag.onConnectionResults(msg, false, checkAdmin)
                 }.addOnFailureListener {
                     it.printStackTrace()
                 }
