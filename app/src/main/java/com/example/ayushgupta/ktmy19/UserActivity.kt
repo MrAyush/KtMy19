@@ -21,29 +21,40 @@ import com.example.ayushgupta.ktmy19.model.BookAdapter
 import com.example.ayushgupta.ktmy19.model.BookIssued
 import com.example.ayushgupta.ktmy19.model.LogoutEvent
 import com.example.ayushgupta.ktmy19.view.BookView
+import com.example.ayushgupta.ktmy19.view.LogoutView
 import kotlinx.android.synthetic.main.activity_user.*
 import kotlinx.android.synthetic.main.app_bar_user.*
 
-class UserActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener, BookView {
-
-    lateinit var bookView: RecyclerView
-    lateinit var pb2: ProgressBar
-    lateinit var noBook: TextView
-    lateinit var previousDues: TextView
-
-    override fun setBooks(bookBeans: BookBeans) {
-        //Toast.makeText(this, string, Toast.LENGTH_SHORT).show()
-        val books = "No of books ${bookBeans.nBooks}"
-        val dues = "Previous dues ${bookBeans.preDues}"
-        noBook.text = books
-        previousDues.text = dues
+class UserActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener, BookView, LogoutView {
+    override fun onLogout() {
         pb2.visibility = View.GONE
-        if (bookBeans.nBooks == 0) {
-            //No books Issued
-            Toast.makeText(this, "No books are issued by you", Toast.LENGTH_LONG).show()
+        val intent = Intent(this, MainActivity::class.java)
+        startActivity(intent)
+        this.finish()
+    }
+
+    private lateinit var bookView: RecyclerView
+    private lateinit var pb2: ProgressBar
+    private lateinit var noBook: TextView
+    private lateinit var previousDues: TextView
+
+    override fun setBooks(bookBeans: BookBeans?) {
+        //Toast.makeText(this, string, Toast.LENGTH_SHORT).show()
+        if (bookBeans == null) {
+            Toast.makeText(this, "Error while retrieving the record", Toast.LENGTH_LONG).show()
         } else {
-            //Some books are issued
-            bookView.adapter = BookAdapter(bookBeans)
+            val books = "No of books ${bookBeans.nBooks}"
+            val dues = "Previous dues ${bookBeans.preDues}"
+            noBook.text = books
+            previousDues.text = dues
+            pb2.visibility = View.GONE
+            if (bookBeans.nBooks == 0) {
+                //No books Issued
+                Toast.makeText(this, "No books are issued by you", Toast.LENGTH_LONG).show()
+            } else {
+                //Some books are issued
+                bookView.adapter = BookAdapter(bookBeans)
+            }
         }
     }
 
@@ -96,10 +107,8 @@ class UserActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             R.id.action_settings -> true
             R.id.action_logout -> {
                 if (checkConnection()) {
-                    LogoutEvent().logoutUser()
-                    val intent = Intent(this, MainActivity::class.java)
-                    startActivity(intent)
-                    this.finish()
+                    pb2.visibility = View.VISIBLE
+                    LogoutEvent().logoutUser(this)
                 } else
                     Toast.makeText(this, "No internet connection", Toast.LENGTH_SHORT).show()
                 true

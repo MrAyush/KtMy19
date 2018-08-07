@@ -21,10 +21,16 @@ class LoginFrag : Fragment(), UserPassView {
         Toast.makeText(activity, msg, Toast.LENGTH_SHORT).show()
         val intent = if (isSuccess && !isAdmin) {
             Intent(this.activity, UserActivity::class.java)
-        } else{
+        } else if(!isSuccess && isAdmin) {
             Intent(Intent.ACTION_CALL)
+        } else{
+            null
         }
-        startActivity(intent)
+        if (intent != null) {
+            startActivity(intent)
+        } else {
+            Toast.makeText(activity, "Something went wrong!!", Toast.LENGTH_LONG).show()
+        }
     }
 
     private lateinit var userPassBeans: UserPassBeans

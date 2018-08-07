@@ -22,8 +22,10 @@ class BookIssued(private val userActivity: UserActivity) : BookIssuePresenter {
                             "${bookBeans?.books?.dueDate} ${bookBeans?.books?.issuedDate} ${bookBeans?.books?.bookRef}")
                     userActivity.setBooks(bookBeans!!)
                 }
+            } else {
+                e.printStackTrace()
+                userActivity.setBooks(null)
             }
-            e?.printStackTrace()
         }
         return true
     }
