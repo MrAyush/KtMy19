@@ -18,7 +18,6 @@ class LoginEvent(private val loginFrag: LoginFrag) : UserPassPresenter {
     private lateinit var mAuth: FirebaseAuth
     private lateinit var msg: String
     private lateinit var progressBar: ProgressBar
-    private lateinit var userInfoBeans: UserInfoBeans
 
     override fun loginWithEmail(userPassBeans: UserPassBeans, view: View) {
         msg = ""
@@ -35,7 +34,7 @@ class LoginEvent(private val loginFrag: LoginFrag) : UserPassPresenter {
             } else {
                 msg = "Login failed."
             }
-            loginFrag.onConnectionResults(msg, isSuccess, false)
+            loginFrag.onConnectionResults(msg, isSuccess, false, userPassBeans.username)
             progressBar.visibility = View.GONE
         }.addOnFailureListener {
             it.printStackTrace()
@@ -75,7 +74,8 @@ class LoginEvent(private val loginFrag: LoginFrag) : UserPassPresenter {
                     } else {
                         msg = "doc doesn't exists"
                     }
-                    loginFrag.onConnectionResults(msg, false, checkAdmin)
+                    val email = mAuth.currentUser?.email!!
+                    loginFrag.onConnectionResults(msg, false, checkAdmin, email)
                 }.addOnFailureListener {
                     it.printStackTrace()
                 }

@@ -15,6 +15,7 @@ class SettingActivity : AppCompatActivity() {
         val spf = getSharedPreferences("Write_to_cal", Context.MODE_PRIVATE)
         write_to_cal.isChecked = spf.getBoolean("calWrite", true)
         Log.w("Setting Class", "Inside Setting class onCreate")
+        Log.w("isChecked", "Inside Setting class ${write_to_cal.isChecked}")
         write_to_cal.setOnCheckedChangeListener { _, isChecked ->
             val spe = spf.edit()
             spe.putBoolean("calWrite", isChecked)

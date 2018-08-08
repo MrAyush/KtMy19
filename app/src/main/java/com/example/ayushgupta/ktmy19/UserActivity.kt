@@ -1,6 +1,5 @@
 package com.example.ayushgupta.ktmy19
 
-import android.content.ContentUris
 import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
@@ -17,9 +16,7 @@ import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.util.Log
-import android.view.Menu
-import android.view.MenuItem
-import android.view.View
+import android.view.*
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
@@ -34,9 +31,26 @@ import kotlinx.android.synthetic.main.app_bar_user.*
 import java.util.*
 
 class UserActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener, BookView, LogoutView {
-    //private lateinit var eventIds:MutableList<Long>
-    private var long: Long = 0
+
+    // To set the date and time to 1 day and 7 hours back
     private val dateConst = 61200000L
+
+    // Adapter view in which the books details are shown
+    private lateinit var bookView: RecyclerView
+
+    // Just to make sure that the activity is not freeze
+    private lateinit var pb2: ProgressBar
+
+    // Numbers of books issued by the student
+    private lateinit var noBook: TextView
+
+    // Shows the due amount
+    private lateinit var previousDues: TextView
+
+    // Set the email of the user
+    private lateinit var email: TextView
+
+    // This method is called after the logout event
     override fun onLogout() {
         pb2.visibility = View.GONE
         val intent = Intent(this, MainActivity::class.java)
@@ -44,11 +58,7 @@ class UserActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         this.finish()
     }
 
-    private lateinit var bookView: RecyclerView
-    private lateinit var pb2: ProgressBar
-    private lateinit var noBook: TextView
-    private lateinit var previousDues: TextView
-
+    // This is method is called after retrieving the data from the firebase
     override fun setBooks(bookBeans: BookBeans?) {
         //Toast.makeText(this, string, Toast.LENGTH_SHORT).show()
         pb2.visibility = View.GONE
@@ -57,32 +67,45 @@ class UserActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         } else {
             val books = "No of books ${bookBeans.nBooks}"
             val dues = "Previous dues ${bookBeans.preDues}"
+
+            // Set the numbers of books and dues
             noBook.text = books
             previousDues.text = dues
+
+            // When no book are issued
             if (bookBeans.nBooks == 0) {
                 //No books Issued
                 Toast.makeText(this, "No books are issued by you", Toast.LENGTH_LONG).show()
             } else {
-                //Some books are issued
+                // Some books are issued
                 val bookAdapter = BookAdapter(bookBeans)
+                // Setting books to recycler view
                 bookView.adapter = bookAdapter
+                // Storing some info
                 val spf = getSharedPreferences("Write_to_cal", Context.MODE_PRIVATE)
+                // Checking if the user wants the event or not
                 val isAllowed = spf.getBoolean("calWrite", true)
+                Log.w("IsAllowed", "Inside UserActivity $isAllowed")
+                // Checking if the record already exists or not
                 val isWritten = spf.getBoolean("isWritten", false)
-                //Delete
-                if (!isAllowed && isWritten) {
-                    deleteFromCalendar(bookBeans)
-                    spf.edit().putBoolean("isWritten", false).apply()
-                }
-                //Add the Due date to calender
-                if (isAllowed && !isWritten) {
-                    writeToCalender(bookBeans)
-                    spf.edit().putBoolean("isWritten", true).apply()
+                Log.w("isWritten", "Inside user class $isWritten")
+                //Deleting the record
+                if (!isAllowed) {
+                    if (isWritten) {
+                        deleteFromCalendar(bookBeans)
+                        spf.edit().putBoolean("isWritten", false).apply()
+                    }
+                } else { //Add the Due date to calender
+                    if (!isWritten) {
+                        writeToCalendar(bookBeans)
+                        spf.edit().putBoolean("isWritten", true).apply()
+                    }
                 }
             }
         }
     }
 
+    // Called when on the creation of the activity
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_user)
@@ -95,11 +118,13 @@ class UserActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         toggle.syncState()
 
         nav_view.setNavigationItemSelectedListener(this)
+        email = nav_view.getHeaderView(0).findViewById(R.id.email)
 
         bookView = findViewById(R.id.books_view)
         pb2 = findViewById(R.id.pb2)
         noBook = findViewById(R.id.no_book)
         previousDues = findViewById(R.id.dues)
+        email.text = intent.getStringExtra("email1")
     }
 
     override fun onResume() {
@@ -163,14 +188,16 @@ class UserActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             R.id.nav_slideshow -> {
 
             }
-            R.id.nav_manage -> {
-
+            R.id.setting -> {
+                val i = Intent(this, SettingActivity::class.java)
+                startActivity(i)
             }
-            R.id.nav_share -> {
-
-            }
-            R.id.nav_send -> {
-
+            R.id.logout -> {
+                if (checkConnection()) {
+                    pb2.visibility = View.VISIBLE
+                    LogoutEvent().logoutUser(this)
+                } else
+                    Toast.makeText(this, "No internet connection", Toast.LENGTH_SHORT).show()
             }
         }
 
@@ -194,32 +221,38 @@ class UserActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         }
     }
 
-    private fun writeToCalender(bookBeans: BookBeans?) {
+    private fun writeToCalendar(bookBeans: BookBeans?) {
         if (checkMyPermission(android.Manifest.permission.WRITE_CALENDAR)) {
-            val dueDate = bookBeans?.books!!.dueDate[0].toDate().time - dateConst
-            Log.w("Date", "${Date(dueDate)}")
-            val content = contentResolver
-            val values = ContentValues()
-            values.put(CalendarContract.Events.DTSTART, dueDate)
-            values.put(CalendarContract.Events.DTEND, dueDate + dateConst)
-            values.put(CalendarContract.Events.TITLE, "Due date of ${bookBeans.books.name[0]}")
-            values.put(CalendarContract.Events.DESCRIPTION, "Last date to re-issue.")
-            values.put(CalendarContract.Events.EVENT_TIMEZONE, TimeZone.getDefault().id)
-            values.put(CalendarContract.Events.EVENT_LOCATION, "ITER Library")
-            values.put(CalendarContract.Events.CALENDAR_ID, 1)
-            values.put(CalendarContract.Events.ALL_DAY, 0)
-            values.put(CalendarContract.Events.HAS_ALARM, 1)
-            val uri =content.insert(CalendarContract.Events.CONTENT_URI, values)
-            long = uri.lastPathSegment.toLong()
-            Log.w("writeToCalender", "writeToCalender writing the data $long")
+            for (i in 0 until bookBeans?.nBooks!!) {
+                val dueDate = bookBeans.books.dueDate[i].toDate().time - dateConst
+                Log.w("Date", "${Date(dueDate)}")
+                val content = contentResolver
+                val values = ContentValues()
+                values.put(CalendarContract.Events.DTSTART, dueDate)
+                values.put(CalendarContract.Events.DTEND, dueDate + dateConst)
+                values.put(CalendarContract.Events.TITLE, "Due date of ${bookBeans.books.name[i]}")
+                values.put(CalendarContract.Events.DESCRIPTION, "Last date to re-issue.")
+                values.put(CalendarContract.Events.EVENT_TIMEZONE, TimeZone.getDefault().id)
+                values.put(CalendarContract.Events.EVENT_LOCATION, "ITER Library")
+                values.put(CalendarContract.Events.CALENDAR_ID, 1)
+                values.put(CalendarContract.Events.ALL_DAY, 0)
+                values.put(CalendarContract.Events.HAS_ALARM, 1)
+                val uri = content.insert(CalendarContract.Events.CONTENT_URI, values)
+                val long = uri.lastPathSegment.toLong()
+                Log.w("writeToCalendar", "writeToCalendar writing the data $long")
+            }
         }
     }
 
     private fun deleteFromCalendar(bookBeans: BookBeans?) {
         if (checkMyPermission(android.Manifest.permission.READ_CALENDAR)) {
-            val uri = ContentUris.withAppendedId(CalendarContract.Events.CONTENT_URI, long)
-            val r = contentResolver.delete(uri, null, null)
-            Log.w("deleteFromCalendar", "deleteFromCalendar writing the data $r")
+            for (i in 0 until bookBeans?.nBooks!!) {
+                //val uri = ContentUris.withAppendedId(CalendarContract.Events.CONTENT_URI, long)
+                val selectionClause = "${CalendarContract.Events.TITLE} = ?"
+                val selectionArgs = arrayOf("Due date of ${bookBeans.books.name[i]}")
+                val r = contentResolver.delete(CalendarContract.Events.CONTENT_URI, selectionClause, selectionArgs)
+                Log.w("deleteFromCalendar", "deleteFromCalendar writing the data $r")
+            }
         }
     }
 

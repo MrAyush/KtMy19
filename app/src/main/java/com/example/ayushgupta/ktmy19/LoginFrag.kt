@@ -12,15 +12,17 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.RadioButton
 import android.widget.Toast
+import com.example.ayushgupta.ktmy19.beans.UserInfoBeans
 import com.example.ayushgupta.ktmy19.beans.UserPassBeans
 import com.example.ayushgupta.ktmy19.model.LoginEvent
 import com.example.ayushgupta.ktmy19.view.UserPassView
 
 class LoginFrag : Fragment(), UserPassView {
-    override fun onConnectionResults(msg: String, isSuccess: Boolean, isAdmin: Boolean) {
+    override fun onConnectionResults(msg: String, isSuccess: Boolean, isAdmin: Boolean, email: String) {
         Toast.makeText(activity, msg, Toast.LENGTH_SHORT).show()
         val intent = if (isSuccess && !isAdmin) {
             Intent(this.activity, UserActivity::class.java)
+                    .putExtra("email1", email)
         } else if(!isSuccess && isAdmin) {
             Intent(Intent.ACTION_CALL)
         } else{
@@ -28,6 +30,7 @@ class LoginFrag : Fragment(), UserPassView {
         }
         if (intent != null) {
             startActivity(intent)
+            activity.finish()
         } else {
             Toast.makeText(activity, "Something went wrong!!", Toast.LENGTH_LONG).show()
         }
