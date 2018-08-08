@@ -21,6 +21,8 @@ class BookIssued(private val userActivity: UserActivity) : BookIssuePresenter {
                     Log.w("Book Details", "${bookBeans?.preDues.toString()} ${bookBeans?.nBooks.toString()} ${bookBeans?.books?.name}" +
                             "${bookBeans?.books?.dueDate} ${bookBeans?.books?.issuedDate} ${bookBeans?.books?.bookRef}")
                     userActivity.setBooks(bookBeans!!)
+                } else {
+                    userActivity.setBooks(null)
                 }
             } else {
                 e.printStackTrace()
