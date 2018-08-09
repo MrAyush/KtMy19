@@ -81,7 +81,7 @@ class UserActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 val bookAdapter = BookAdapter(bookBeans)
                 // Setting books to recycler view
                 bookView.adapter = bookAdapter
-                // Storing some info
+                // Storing and checking some validation info
                 val spf = getSharedPreferences("Write_to_cal", Context.MODE_PRIVATE)
                 // Checking if the user wants the event or not
                 val isAllowed = spf.getBoolean("calWrite", true)
@@ -125,19 +125,17 @@ class UserActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         noBook = findViewById(R.id.no_book)
         previousDues = findViewById(R.id.dues)
         email.text = intent.getStringExtra("email1")
+
+        // Get the books from the firebase firestore
+        getBooks()
     }
 
     override fun onResume() {
         super.onResume()
+        getBooks()
         Log.w("User Class", "Inside user class onResume")
         val lManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
         bookView.layoutManager = lManager
-
-        if (!checkConnection()) {
-            Toast.makeText(this, "No internet connection", Toast.LENGTH_SHORT).show()
-        } else {
-            BookIssued(this).getIssuedBooks()
-        }
     }
 
     override fun onBackPressed() {
@@ -170,6 +168,10 @@ class UserActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                     LogoutEvent().logoutUser(this)
                 } else
                     Toast.makeText(this, "No internet connection", Toast.LENGTH_SHORT).show()
+                true
+            }
+            R.id.refresh -> {
+                getBooks()
                 true
             }
             else -> super.onOptionsItemSelected(item)
@@ -245,14 +247,47 @@ class UserActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
     private fun deleteFromCalendar(bookBeans: BookBeans?) {
-        if (checkMyPermission(android.Manifest.permission.READ_CALENDAR)) {
-            for (i in 0 until bookBeans?.nBooks!!) {
+        if (checkMyPermission(android.Manifest.permission.WRITE_CALENDAR)) {
+            for (i in 0 until bookBeans?.maxBooks!!) {
+                Log.w("deleteFromCalendar", "Inside deleteFromCalendar")
                 //val uri = ContentUris.withAppendedId(CalendarContract.Events.CONTENT_URI, long)
-                val selectionClause = "${CalendarContract.Events.TITLE} = ?"
-                val selectionArgs = arrayOf("Due date of ${bookBeans.books.name[i]}")
+                val selectionClause = "((${CalendarContract.Events.TITLE} = ?) OR ( (${CalendarContract.Events.DESCRIPTION} = ?)" +
+                        " AND (${CalendarContract.Events.EVENT_LOCATION} = ?) ))"
+                val selectionArgs = arrayOf("Due date of ${bookBeans.books.name[i]}", "Last date to re-issue.", "ITER Library")
                 val r = contentResolver.delete(CalendarContract.Events.CONTENT_URI, selectionClause, selectionArgs)
                 Log.w("deleteFromCalendar", "deleteFromCalendar writing the data $r")
             }
+        }
+    }
+
+    // Deletes all the event that are created by the this app
+    private fun deleteFromCalendar() {
+        if (checkMyPermission(android.Manifest.permission.WRITE_CALENDAR)) {
+            Log.w("deleteFromCalendar", "Inside deleteFromCalendar")
+            //val uri = ContentUris.withAppendedId(CalendarContract.Events.CONTENT_URI, long)
+            val selectionClause = "((${CalendarContract.Events.DESCRIPTION} = ?) AND " +
+                    "(${CalendarContract.Events.EVENT_LOCATION} = ?))"
+            val selectionArgs = arrayOf("Last date to re-issue.", "ITER Library")
+            val r = contentResolver.delete(CalendarContract.Events.CONTENT_URI, selectionClause, selectionArgs)
+            Log.w("deleteFromCalendar", "deleteFromCalendar writing the data $r")
+        }
+    }
+
+    private fun getBooks() {
+        pb2.visibility = View.VISIBLE
+        if (!checkConnection()) {
+            Toast.makeText(this, "No internet connection", Toast.LENGTH_SHORT).show()
+            pb2.visibility = View.GONE
+        } else {
+            // Storing and checking some validation info
+            val spf = getSharedPreferences("Write_to_cal", Context.MODE_PRIVATE)
+            val isAllowed = spf.getBoolean("calWrite", true)
+            // Checking if the user wants the event or not
+            if (isAllowed) {
+                deleteFromCalendar()
+                spf.edit().putBoolean("isWritten", false).apply()
+            }
+            BookIssued(this).getIssuedBooks()
         }
     }
 

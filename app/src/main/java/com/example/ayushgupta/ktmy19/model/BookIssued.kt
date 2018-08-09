@@ -14,20 +14,18 @@ class BookIssued(private val userActivity: UserActivity) : BookIssuePresenter {
     override fun getIssuedBooks(): Boolean {
         val uid = FirebaseAuth.getInstance().currentUser?.uid
         val dRef = dBase.collection("IssuedBooks").document(uid!!)
-        dRef.addSnapshotListener { snapshot, e ->
-            if (e == null) {
-                if (snapshot?.exists()!!) {
-                    val bookBeans = snapshot.toObject(BookBeans::class.java)
-                    Log.w("Book Details", "${bookBeans?.preDues.toString()} ${bookBeans?.nBooks.toString()} ${bookBeans?.books?.name}" +
-                            "${bookBeans?.books?.dueDate} ${bookBeans?.books?.issuedDate} ${bookBeans?.books?.bookRef}")
-                    userActivity.setBooks(bookBeans!!)
-                } else {
-                    userActivity.setBooks(null)
-                }
+        dRef.get().addOnSuccessListener {
+            if (it.exists()) {
+                val bookBeans = it.toObject(BookBeans::class.java)
+                Log.w("Book Details", "${bookBeans?.preDues.toString()} ${bookBeans?.nBooks.toString()} ${bookBeans?.books?.name}" +
+                        "${bookBeans?.books?.dueDate} ${bookBeans?.books?.issuedDate} ${bookBeans?.books?.bookRef}")
+                userActivity.setBooks(bookBeans!!)
             } else {
-                e.printStackTrace()
                 userActivity.setBooks(null)
             }
+        }.addOnFailureListener {
+            it.printStackTrace()
+            userActivity.setBooks(null)
         }
         return true
     }
