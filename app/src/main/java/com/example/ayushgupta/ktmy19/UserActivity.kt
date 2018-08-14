@@ -50,6 +50,9 @@ class UserActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     // Set the email of the user
     private lateinit var email: TextView
 
+    // Package manager
+    private lateinit var manager: PackageManager
+
     // This method is called after the logout event
     override fun onLogout() {
         pb2.visibility = View.GONE
@@ -81,24 +84,26 @@ class UserActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 val bookAdapter = BookAdapter(bookBeans)
                 // Setting books to recycler view
                 bookView.adapter = bookAdapter
-                // Storing and checking some validation info
-                val spf = getSharedPreferences("Write_to_cal", Context.MODE_PRIVATE)
-                // Checking if the user wants the event or not
-                val isAllowed = spf.getBoolean("calWrite", true)
-                Log.w("IsAllowed", "Inside UserActivity $isAllowed")
-                // Checking if the record already exists or not
-                val isWritten = spf.getBoolean("isWritten", false)
-                Log.w("isWritten", "Inside user class $isWritten")
-                //Deleting the record
-                if (!isAllowed) {
-                    if (isWritten) {
-                        deleteFromCalendar(bookBeans)
-                        spf.edit().putBoolean("isWritten", false).apply()
-                    }
-                } else { //Add the Due date to calender
-                    if (!isWritten) {
-                        writeToCalendar(bookBeans)
-                        spf.edit().putBoolean("isWritten", true).apply()
+                if (manager.checkPermission(android.Manifest.permission.WRITE_CALENDAR, "com.example.ayushgupta.ktmy19") == PackageManager.PERMISSION_GRANTED) {
+                    // Storing and checking some validation info
+                    val spf = getSharedPreferences("Write_to_cal", Context.MODE_PRIVATE)
+                    // Checking if the user wants the event or not
+                    val isAllowed = spf.getBoolean("calWrite", true)
+                    Log.w("IsAllowed", "Inside UserActivity $isAllowed")
+                    // Checking if the record already exists or not
+                    val isWritten = spf.getBoolean("isWritten", false)
+                    Log.w("isWritten", "Inside user class $isWritten")
+                    //Deleting the record
+                    if (!isAllowed) {
+                        if (isWritten) {
+                            deleteFromCalendar(bookBeans)
+                            spf.edit().putBoolean("isWritten", false).apply()
+                        }
+                    } else { //Add the Due date to calender
+                        if (!isWritten) {
+                            writeToCalendar(bookBeans)
+                            spf.edit().putBoolean("isWritten", true).apply()
+                        }
                     }
                 }
             }
@@ -125,13 +130,16 @@ class UserActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         noBook = findViewById(R.id.no_book)
         previousDues = findViewById(R.id.dues)
         email.text = intent.getStringExtra("email1")
+        manager = packageManager
 
-        // Get the books from the firebase firestore
-        getBooks()
+        val isAsked = getSharedPreferences("Write_to_cal", Context.MODE_PRIVATE).getBoolean("isAsked", false)
+        if (!isAsked)
+            checkMyPermission(android.Manifest.permission.WRITE_CALENDAR)
     }
 
     override fun onResume() {
         super.onResume()
+        // Get the books from the firebase firestore
         getBooks()
         Log.w("User Class", "Inside user class onResume")
         val lManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
@@ -279,14 +287,17 @@ class UserActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             Toast.makeText(this, "No internet connection", Toast.LENGTH_SHORT).show()
             pb2.visibility = View.GONE
         } else {
-            // Storing and checking some validation info
-            val spf = getSharedPreferences("Write_to_cal", Context.MODE_PRIVATE)
-            val isAllowed = spf.getBoolean("calWrite", true)
-            // Checking if the user wants the event or not
-            if (isAllowed) {
-                deleteFromCalendar()
-                spf.edit().putBoolean("isWritten", false).apply()
+            if (checkPermission(android.Manifest.permission.WRITE_CALENDAR, 100, 100) == PackageManager.PERMISSION_GRANTED) {
+                // Storing and checking some validation info
+                val spf = getSharedPreferences("Write_to_cal", Context.MODE_PRIVATE)
+                val isAllowed = spf.getBoolean("calWrite", true)
+                // Checking if the user wants the event or not
+                if (isAllowed) {
+                    deleteFromCalendar()
+                    spf.edit().putBoolean("isWritten", false).apply()
+                }
             }
+
             BookIssued(this).getIssuedBooks()
         }
     }
@@ -295,6 +306,7 @@ class UserActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (grantResults[0] == PackageManager.PERMISSION_DENIED) {
             Toast.makeText(this, "Can't write to calender", Toast.LENGTH_SHORT).show()
+            getSharedPreferences("Write_to_cal", Context.MODE_PRIVATE).edit().putBoolean("calWrite", false).putBoolean("isAsked", true).apply()
         } else {
             recreate()
         }
