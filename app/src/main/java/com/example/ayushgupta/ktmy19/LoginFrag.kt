@@ -4,14 +4,12 @@ import android.app.Fragment
 import android.content.Context
 import android.content.Intent
 import android.net.ConnectivityManager
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.EditText
-import android.widget.RadioButton
-import android.widget.Toast
+import android.widget.*
 import com.example.ayushgupta.ktmy19.beans.UserInfoBeans
 import com.example.ayushgupta.ktmy19.beans.UserPassBeans
 import com.example.ayushgupta.ktmy19.model.LoginEvent
@@ -23,9 +21,9 @@ class LoginFrag : Fragment(), UserPassView {
         val intent = if (isSuccess && !isAdmin) {
             Intent(this.activity, UserActivity::class.java)
                     .putExtra("email1", email)
-        } else if(!isSuccess && isAdmin) {
+        } else if (!isSuccess && isAdmin) {
             Intent(Intent.ACTION_CALL)
-        } else{
+        } else {
             null
         }
         if (intent != null) {
@@ -41,6 +39,7 @@ class LoginFrag : Fragment(), UserPassView {
     private lateinit var let1: EditText
     private lateinit var let2: EditText
     private lateinit var radioButton: RadioButton
+    private lateinit var linearLayout: LinearLayout
 
     override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View {
         val view = inflater?.inflate(R.layout.loginpage, container, false)
@@ -48,6 +47,12 @@ class LoginFrag : Fragment(), UserPassView {
         let1 = view.findViewById(R.id.let1)
         let2 = view.findViewById(R.id.let2)
         radioButton = view.findViewById(R.id.admin)
+        linearLayout = view.findViewById(R.id.ll1)
+
+        if (Build.VERSION.SDK_INT >= 24) {
+            linearLayout.setBackgroundResource(R.drawable.libiter)
+        }
+
 
         btn.setOnClickListener {
             val cManager = activity.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
